@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   ESTILOS BASE PARA ACCESIBILIDAD
+   ============================================ */
+
+@layer base {
+  html {
+    /* Tamaño base grande para accesibilidad */
+    font-size: 18px;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+    /* Alto contraste para WCAG AAA */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* Suavizar el scroll */
+    scroll-behavior: smooth;
+  }
+
+  /* Mejorar legibilidad */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus visible para accesibilidad de teclado */
+  *:focus-visible {
+    @apply outline-none ring-4 ring-primary-500 ring-offset-2;
+  }
+
+  /* Evitar texto demasiado ancho */
+  p, li {
+    max-width: 65ch;
+  }
+}
+
+@layer components {
+  /* Contenedor principal para pacientes */
+  .container-paciente {
+    @apply max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8;
+  }
+
+  /* Botón gigante accesible */
+  .btn-gigante {
+    @apply flex items-center justify-center gap-4 w-full
+           min-h-[80px] px-8 py-6
+           text-2xl sm:text-3xl font-bold
+           rounded-2xl shadow-lg
+           transition-all duration-200
+           active:scale-95 active:shadow-md;
+  }
+
+  .btn-gigante-primary {
+    @apply btn-gigante
+           bg-primary-500 hover:bg-primary-600
+           text-white;
+  }
+
+  .btn-gigante-success {
+    @apply btn-gigante
+           bg-success-500 hover:bg-success-600
+           text-white;
+  }
+
+  .btn-gigante-secondary {
+    @apply btn-gigante
+           bg-white hover:bg-gray-50
+           text-gray-900 border-4 border-gray-300;
+  }
+
+  .btn-gigante-danger {
+    @apply btn-gigante
+           bg-danger-500 hover:bg-danger-600
+           text-white;
+  }
+
+  /* Tarjeta de profesional */
+  .card-profesional {
+    @apply flex flex-col items-center gap-4 p-6
+           bg-white rounded-2xl shadow-md border-4 border-gray-200
+           hover:border-primary-400 hover:shadow-xl
+           transition-all duration-200
+           cursor-pointer active:scale-95;
+  }
+
+  /* Tarjeta de turno */
+  .card-turno {
+    @apply flex flex-col gap-3 p-6
+           bg-white rounded-xl shadow-md border-2 border-gray-200;
+  }
+
+  /* Título de sección */
+  .titulo-seccion {
+    @apply text-3xl sm:text-4xl font-bold text-gray-900 mb-6;
+  }
+
+  /* Botón de calendario (día/hora) */
+  .btn-calendario {
+    @apply flex items-center justify-center
+           min-h-[70px] px-6 py-4
+           text-xl font-semibold
+           rounded-xl border-3 border-gray-300
+           bg-white hover:bg-primary-50 hover:border-primary-500
+           transition-all duration-150
+           active:scale-95;
+  }
+
+  .btn-calendario-selected {
+    @apply btn-calendario
+           bg-primary-500 text-white border-primary-600
+           hover:bg-primary-600;
+  }
+
+  .btn-calendario-disabled {
+    @apply btn-calendario
+           opacity-40 cursor-not-allowed
+           hover:bg-white hover:border-gray-300;
+  }
+}
+
+@layer utilities {
+  /* Animación de feedback exitoso */
+  @keyframes pulse-success {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .animate-pulse-success {
+    animation: pulse-success 0.5s ease-in-out;
+  }
+
+  /* Sin scroll horizontal */
+  .no-scroll-x {
+    overflow-x: hidden;
+  }
+}

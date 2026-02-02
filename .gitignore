@@ -1,0 +1,149 @@
+# ============================================
+# SANATORIO TURNOS - .gitignore
+# ============================================
+
+# ============================================
+# NODE
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# NEXT.JS (Frontend)
+# ============================================
+.next/
+out/
+build/
+dist/
+.vercel/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# ============================================
+# VARIABLES DE ENTORNO (SENSIBLES)
+# ============================================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env*.local
+
+# ============================================
+# PRISMA
+# ============================================
+prisma/migrations/*/migration.sql
+*.db
+*.db-journal
+
+# ============================================
+# TYPESCRIPT
+# ============================================
+*.tsbuildinfo
+dist/
+build/
+
+# ============================================
+# LOGS
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# EDITORS / IDEs
+# ============================================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+.history/
+
+# ============================================
+# TESTS
+# ============================================
+coverage/
+*.lcov
+.nyc_output/
+.grunt/
+.lock-wscript/
+
+# ============================================
+# TEMPORALES
+# ============================================
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+
+# ============================================
+# BACKUPS
+# ============================================
+*.backup
+*.sql
+*.dump
+
+# ============================================
+# CERTIFICATES / KEYS
+# ============================================
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# ============================================
+# PWA / SERVICE WORKERS (generados)
+# ============================================
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+
+# ============================================
+# MISC
+# ============================================
+.eslintcache
+.cache/
+*.seed
+*.pid
+*.pid.lock
+.npm/
+
+# ============================================
+# ARCHIVOS DE PROYECTO
+# ============================================
+# NO ignorar
+!.gitkeep
+!.vscode/extensions.json
+!.vscode/settings.json
