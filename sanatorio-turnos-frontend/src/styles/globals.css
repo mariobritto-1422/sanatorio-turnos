@@ -102,7 +102,7 @@
     @apply flex items-center justify-center
            min-h-[70px] px-6 py-4
            text-xl font-semibold
-           rounded-xl border-3 border-gray-300
+           rounded-xl border-[3px] border-gray-300
            bg-white hover:bg-primary-50 hover:border-primary-500
            transition-all duration-150
            active:scale-95;
