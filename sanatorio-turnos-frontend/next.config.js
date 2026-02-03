@@ -1,17 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
+  trailingSlash: true,
 
   // PWA Configuration
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', 'date-fns'],
   },
 
-  // Images
+  // Images - deshabilitado para exportación estática
   images: {
-    domains: ['localhost'],
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60,
+    unoptimized: true,
   },
 
   // Compression
@@ -99,15 +99,6 @@ const nextConfig = {
     return config;
   },
 
-  // Rewrites para PWA
-  async rewrites() {
-    return [
-      {
-        source: '/sw.js',
-        destination: '/_next/static/sw.js',
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;

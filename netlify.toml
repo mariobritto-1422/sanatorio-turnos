@@ -1,0 +1,7 @@
+[build]
+  base = "sanatorio-turnos-frontend"
+  command = "npm run build"
+  publish = "out"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
