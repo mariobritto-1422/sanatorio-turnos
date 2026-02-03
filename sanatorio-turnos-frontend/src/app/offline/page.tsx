@@ -1,4 +1,8 @@
+'use client';
+
 import { WifiOff } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 export default function OfflinePage() {
   return (

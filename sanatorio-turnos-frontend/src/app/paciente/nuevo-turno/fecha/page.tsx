@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/ui/Header';
 import { BotonGigante } from '@/components/ui/BotonGigante';
@@ -12,7 +12,7 @@ import { CalendarCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function FechaHoraPage() {
+function FechaHoraContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token, isAuthenticated, usuario } = useAuthStore();
@@ -271,5 +271,18 @@ export default function FechaHoraPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function FechaHoraPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-gray-50">
+        <Header titulo="Elegir Fecha y Hora" mostrarVolver />
+        <Loading mensaje="Cargando..." />
+      </main>
+    }>
+      <FechaHoraContent />
+    </Suspense>
   );
 }
