@@ -10,6 +10,14 @@ interface Usuario {
     nombre: string;
     apellido: string;
   };
+  profesional?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    especialidadId: string;
+    matricula: string;
+    especialidad?: string;
+  };
 }
 
 interface AuthState {
