@@ -22,7 +22,7 @@ export default function LoginPage() {
     try {
       // Por ahora, login simple con código de paciente
       // En producción, esto podría ser DNI, código QR, etc.
-      const email = `${codigo}@paciente.com`; // Ejemplo simplificado
+      const email = `${codigo}@email.com`; // Formato coincidente con backend
       const password = 'Paciente123!'; // En producción: usar código o pin
 
       const response = await api.login(email, password);
