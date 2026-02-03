@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogIn } from 'lucide-react';
-import { BotonGigante } from '@/components/ui/BotonGigante';
+import { LogIn, Mail, Lock, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
-  const [codigo, setCodigo] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
@@ -20,90 +20,145 @@ export default function LoginPage() {
     setCargando(true);
 
     try {
-      // Por ahora, login simple con código de paciente
-      // En producción, esto podría ser DNI, código QR, etc.
-      const email = `${codigo}@email.com`; // Formato coincidente con backend
-      const password = 'Paciente123!'; // En producción: usar código o pin
-
       const response = await api.login(email, password);
 
-      if (response.success && response.data.usuario.rol === 'PACIENTE') {
+      if (response.success && response.data.usuario) {
         login(response.data.token, response.data.usuario);
-        router.push('/');
+
+        // Redirigir según el rol del usuario
+        switch (response.data.usuario.rol) {
+          case 'PACIENTE':
+            router.push('/');
+            break;
+          case 'PROFESIONAL':
+            router.push('/profesional/dashboard');
+            break;
+          case 'RECEPCION':
+          case 'SUPERADMIN':
+            router.push('/recepcion/dashboard');
+            break;
+          default:
+            router.push('/');
+        }
       } else {
-        setError('Este acceso es solo para pacientes');
+        setError('Credenciales incorrectas');
       }
     } catch (err: any) {
-      setError('Código incorrecto. Consultá en recepción.');
+      setError('Email o contraseña incorrectos. Verificá tus datos.');
     } finally {
       setCargando(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex items-center justify-center">
-      <div className="container-paciente max-w-md">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+    <main className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-500 rounded-full mb-4">
+            <User className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Bienvenido
           </h1>
-          <p className="text-2xl text-gray-600">
-            Ingresá tu código de paciente
+          <p className="text-gray-600">
+            Sistema de Gestión de Turnos
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Input del código */}
-          <div>
-            <label
-              htmlFor="codigo"
-              className="block text-2xl font-semibold text-gray-900 mb-3"
-            >
-              Tu código
-            </label>
-            <input
-              id="codigo"
-              type="text"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              className="w-full px-6 py-6 text-3xl text-center font-bold
-                         border-4 border-gray-300 rounded-xl
-                         focus:border-primary-500 focus:ring-4 focus:ring-primary-200
-                         transition-all duration-200"
-              placeholder="12345"
-              required
-              autoFocus
-            />
-            <p className="mt-3 text-lg text-gray-600 text-center">
-              Si no tenés código, pedilo en recepción
-            </p>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="p-4 bg-danger-50 border-2 border-danger-300 rounded-xl">
-              <p className="text-xl text-danger-800 text-center font-semibold">
-                {error}
-              </p>
+        {/* Formulario */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Email
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg
+                           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                           transition-colors"
+                  placeholder="tu-email@ejemplo.com"
+                  required
+                  autoFocus
+                />
+              </div>
             </div>
-          )}
 
-          {/* Botón de ingresar */}
-          <BotonGigante
-            type="submit"
-            icon={LogIn}
-            variant="primary"
-            disabled={cargando || !codigo}
-          >
-            {cargando ? 'INGRESANDO...' : 'INGRESAR'}
-          </BotonGigante>
-        </form>
+            {/* Contraseña */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Contraseña
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg
+                           focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+                           transition-colors"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
 
-        {/* Nota de ayuda */}
-        <div className="mt-12 p-6 bg-primary-50 rounded-xl border-2 border-primary-200">
-          <p className="text-xl text-center text-gray-700">
-            💡 Podés usar el código de prueba: <strong>juan.perez</strong>
+            {/* Error */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800 text-center font-medium">
+                  {error}
+                </p>
+              </div>
+            )}
+
+            {/* Botón */}
+            <button
+              type="submit"
+              disabled={cargando || !email || !password}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3
+                       bg-primary-500 hover:bg-primary-600
+                       text-white font-semibold rounded-lg
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transition-colors duration-200
+                       focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+            >
+              <LogIn className="w-5 h-5" />
+              {cargando ? 'Ingresando...' : 'Ingresar'}
+            </button>
+          </form>
+        </div>
+
+        {/* Credenciales de prueba */}
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-sm font-semibold text-gray-700 mb-2">
+            💡 Credenciales de prueba:
           </p>
+          <div className="space-y-1 text-xs text-gray-600">
+            <p><strong>Paciente:</strong> juan.perez@email.com / Paciente123!</p>
+            <p><strong>Recepción:</strong> recepcion@sanatorio.com / Recepcion123!</p>
+            <p><strong>Profesional:</strong> garcia@sanatorio.com / Garcia123!</p>
+            <p><strong>Admin:</strong> admin@sanatorio.com / Admin123!</p>
+          </div>
         </div>
       </div>
     </main>
