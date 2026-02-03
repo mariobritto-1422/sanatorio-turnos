@@ -7,6 +7,7 @@ import { Loading } from '@/components/ui/Loading';
 import { Calendar, Users, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { QRInstalacion } from '@/components/recepcion/QRInstalacion';
 
 export default function DashboardRecepcionPage() {
   const { token } = useAuthStore();
@@ -189,6 +190,11 @@ export default function DashboardRecepcionPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* QR de Instalación */}
+      <div className="mb-8">
+        <QRInstalacion />
       </div>
 
       {/* Turnos Recientes */}
