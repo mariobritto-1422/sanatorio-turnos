@@ -6,6 +6,13 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Iniciando seed...');
 
+  // Verificar si ya existe data
+  const existingUsers = await prisma.usuario.count();
+  if (existingUsers > 0) {
+    console.log('⚠️  Base de datos ya tiene datos. Saltando seed.');
+    return;
+  }
+
   // ============================================
   // 1. SUPERADMIN
   // ============================================
