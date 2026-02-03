@@ -39,3 +39,6 @@ export const authenticate = async (
     });
   }
 };
+
+// Alias para compatibilidad con otros archivos
+export const verificarToken = authenticate;

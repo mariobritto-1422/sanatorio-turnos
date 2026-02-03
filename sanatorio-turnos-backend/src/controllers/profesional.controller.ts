@@ -24,7 +24,7 @@ export const profesionalController = {
   async getById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const profesional = await profesionalService.getById(id);
+      const profesional = await profesionalService.getById(id as string);
 
       res.json({
         success: true,
@@ -62,7 +62,7 @@ export const profesionalController = {
   async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const profesional = await profesionalService.update(id, req.body);
+      const profesional = await profesionalService.update(id as string, req.body);
 
       logger.info('Profesional actualizado', { id });
 
@@ -83,7 +83,7 @@ export const profesionalController = {
   async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await profesionalService.delete(id);
+      await profesionalService.delete(id as string);
 
       logger.info('Profesional eliminado', { id });
 
@@ -103,7 +103,7 @@ export const profesionalController = {
   async getHorarios(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const horarios = await profesionalService.getHorarios(id);
+      const horarios = await profesionalService.getHorarios(id as string);
 
       res.json({
         success: true,
@@ -141,7 +141,7 @@ export const profesionalController = {
   async deleteHorario(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await profesionalService.deleteHorario(id);
+      await profesionalService.deleteHorario(id as string);
 
       logger.info('Horario eliminado', { id });
 

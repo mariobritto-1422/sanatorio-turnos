@@ -49,7 +49,7 @@ export async function obtenerPlantilla(req: Request, res: Response) {
     const { id } = req.params;
 
     const plantilla = await prisma.plantillaNotificacion.findUnique({
-      where: { id },
+      where: { id: id as string },
     });
 
     if (!plantilla) {
@@ -103,7 +103,7 @@ export async function actualizarPlantilla(req: Request, res: Response) {
     const datos = PlantillaSchema.partial().parse(req.body);
 
     const plantilla = await prisma.plantillaNotificacion.update({
-      where: { id },
+      where: { id: id as string },
       data: datos,
     });
 
@@ -122,7 +122,7 @@ export async function eliminarPlantilla(req: Request, res: Response) {
     const { id } = req.params;
 
     await prisma.plantillaNotificacion.delete({
-      where: { id },
+      where: { id: id as string },
     });
 
     res.json({ mensaje: 'Plantilla eliminada correctamente' });
@@ -154,10 +154,16 @@ export async function actualizarConfiguracion(req: Request, res: Response) {
     const { tipo } = req.params;
     const datos = ConfiguracionSchema.parse(req.body);
 
+    // Aseguramos que tipoNotificacion está presente para el create
+    const dataWithType = {
+      ...datos,
+      tipoNotificacion: datos.tipoNotificacion,
+    };
+
     const config = await prisma.configuracionNotificaciones.upsert({
       where: { tipoNotificacion: datos.tipoNotificacion },
       update: datos,
-      create: datos,
+      create: dataWithType as any,
     });
 
     res.json(config);

@@ -37,7 +37,7 @@ export const turnoController = {
   async getById(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      const turno = await turnoService.getById(id);
+      const turno = await turnoService.getById(id as string);
 
       res.json({
         success: true,
@@ -91,7 +91,7 @@ export const turnoController = {
   async update(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params;
-      const turno = await turnoService.update(id, req.body, req.user?.id);
+      const turno = await turnoService.update(id as string, req.body, req.user?.id);
 
       logger.info('Turno actualizado', { id });
 
@@ -121,13 +121,13 @@ export const turnoController = {
       const { id } = req.params;
       const { motivo } = req.body;
 
-      const turno = await turnoService.cancel(id, motivo, req.user.id, req.user.rol);
+      const turno = await turnoService.cancel(id as string, motivo, req.user.id, req.user.rol);
 
       logger.info('Turno cancelado', { id, canceladoPor: req.user.rol });
 
       // Enviar notificación de cancelación
       try {
-        await notificarCancelacionTurno(id);
+        await notificarCancelacionTurno(id as string);
         logger.info('Notificación de cancelación enviada', { turnoId: id });
       } catch (notifError: any) {
         logger.error('Error al enviar notificación de cancelación', { error: notifError.message });

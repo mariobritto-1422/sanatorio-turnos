@@ -24,7 +24,7 @@ export const obraSocialController = {
   async getById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const obraSocial = await obraSocialService.getById(id);
+      const obraSocial = await obraSocialService.getById(id as string);
 
       res.json({
         success: true,
@@ -62,7 +62,7 @@ export const obraSocialController = {
   async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const obraSocial = await obraSocialService.update(id, req.body);
+      const obraSocial = await obraSocialService.update(id as string, req.body);
 
       logger.info('Obra social actualizada', { id });
 
@@ -83,7 +83,7 @@ export const obraSocialController = {
   async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const result = await obraSocialService.delete(id);
+      const result = await obraSocialService.delete(id as string);
 
       logger.info('Obra social eliminada', { id });
 

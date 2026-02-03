@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { verificarToken } from '../middleware/auth.middleware';
-import { verificarRol } from '../middleware/roles.middleware';
+import { requireRole } from '../middleware/rbac.middleware';
+import { Rol } from '@prisma/client';
 import * as notificacionesController from '../controllers/notificaciones.controller';
 
 const router = Router();
@@ -15,31 +16,31 @@ router.use(verificarToken);
 // ============================================
 router.get(
   '/plantillas',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.obtenerPlantillas
 );
 
 router.get(
   '/plantillas/:id',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.obtenerPlantilla
 );
 
 router.post(
   '/plantillas',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.crearPlantilla
 );
 
 router.put(
   '/plantillas/:id',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.actualizarPlantilla
 );
 
 router.delete(
   '/plantillas/:id',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.eliminarPlantilla
 );
 
@@ -48,13 +49,13 @@ router.delete(
 // ============================================
 router.get(
   '/configuracion',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.obtenerConfiguraciones
 );
 
 router.put(
   '/configuracion/:tipo',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.actualizarConfiguracion
 );
 
@@ -63,13 +64,13 @@ router.put(
 // ============================================
 router.get(
   '/log',
-  verificarRol(['SUPERADMIN', 'RECEPCION']),
+  requireRole(Rol.SUPERADMIN, Rol.RECEPCION),
   notificacionesController.obtenerLogNotificaciones
 );
 
 router.get(
   '/estadisticas',
-  verificarRol(['SUPERADMIN', 'RECEPCION']),
+  requireRole(Rol.SUPERADMIN, Rol.RECEPCION),
   notificacionesController.obtenerEstadisticasNotificaciones
 );
 
@@ -78,19 +79,19 @@ router.get(
 // ============================================
 router.post(
   '/pruebas/email',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.probarEmail
 );
 
 router.post(
   '/pruebas/whatsapp',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.probarWhatsApp
 );
 
 router.get(
   '/estado',
-  verificarRol(['SUPERADMIN']),
+  requireRole(Rol.SUPERADMIN),
   notificacionesController.obtenerEstadoServicios
 );
 

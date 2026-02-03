@@ -28,7 +28,7 @@ export const pacienteController = {
   async getById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const paciente = await pacienteService.getById(id);
+      const paciente = await pacienteService.getById(id as string);
 
       res.json({
         success: true,
@@ -46,7 +46,7 @@ export const pacienteController = {
   async getByDni(req: Request, res: Response) {
     try {
       const { dni } = req.params;
-      const paciente = await pacienteService.getByDni(dni);
+      const paciente = await pacienteService.getByDni(dni as string);
 
       res.json({
         success: true,
@@ -84,7 +84,7 @@ export const pacienteController = {
   async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const paciente = await pacienteService.update(id, req.body);
+      const paciente = await pacienteService.update(id as string, req.body);
 
       logger.info('Paciente actualizado', { id });
 
@@ -105,7 +105,7 @@ export const pacienteController = {
   async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await pacienteService.delete(id);
+      await pacienteService.delete(id as string);
 
       logger.info('Paciente eliminado', { id });
 
