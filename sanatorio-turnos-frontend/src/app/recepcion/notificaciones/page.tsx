@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, Mail, MessageSquare, Settings, FileText, BarChart3 } from 'lucide-react';
+import { api } from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 
 type Vista = 'plantillas' | 'configuracion' | 'log' | 'estadisticas';
 
 export default function NotificacionesPage() {
+  const { token } = useAuthStore();
   const [vistaActual, setVistaActual] = useState<Vista>('plantillas');
   const [estadoServicios, setEstadoServicios] = useState<any>(null);
 
@@ -14,10 +17,13 @@ export default function NotificacionesPage() {
   }, []);
 
   const cargarEstadoServicios = async () => {
+    if (!token) return;
+
     try {
-      const response = await fetch('/api/notificaciones/estado');
-      const data = await response.json();
-      setEstadoServicios(data);
+      const response = await api.get('/notificaciones/estado', token);
+      if (response.success) {
+        setEstadoServicios(response.data);
+      }
     } catch (error) {
       console.error('Error al cargar estado de servicios:', error);
     }
@@ -152,6 +158,7 @@ export default function NotificacionesPage() {
 // VISTA: PLANTILLAS
 // ============================================
 function VistaPlantillas() {
+  const { token } = useAuthStore();
   const [plantillas, setPlantillas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<any>(null);
@@ -161,11 +168,14 @@ function VistaPlantillas() {
   }, []);
 
   const cargarPlantillas = async () => {
+    if (!token) return;
+
     setLoading(true);
     try {
-      const response = await fetch('/api/notificaciones/plantillas');
-      const data = await response.json();
-      setPlantillas(data);
+      const response = await api.get('/notificaciones/plantillas', token);
+      if (response.success) {
+        setPlantillas(response.data);
+      }
     } catch (error) {
       console.error('Error al cargar plantillas:', error);
     } finally {
@@ -285,6 +295,7 @@ function VistaPlantillas() {
 // VISTA: CONFIGURACIÓN
 // ============================================
 function VistaConfiguracion() {
+  const { token } = useAuthStore();
   const [configuraciones, setConfiguraciones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -293,11 +304,14 @@ function VistaConfiguracion() {
   }, []);
 
   const cargarConfiguraciones = async () => {
+    if (!token) return;
+
     setLoading(true);
     try {
-      const response = await fetch('/api/notificaciones/configuracion');
-      const data = await response.json();
-      setConfiguraciones(data);
+      const response = await api.get('/notificaciones/configuracion', token);
+      if (response.success) {
+        setConfiguraciones(response.data);
+      }
     } catch (error) {
       console.error('Error al cargar configuraciones:', error);
     } finally {
@@ -306,15 +320,13 @@ function VistaConfiguracion() {
   };
 
   const actualizarConfiguracion = async (tipo: string, campo: string, valor: any) => {
+    if (!token) return;
+
     try {
       const config = configuraciones.find((c) => c.tipoNotificacion === tipo);
       const updated = { ...config, [campo]: valor };
 
-      await fetch(`/api/notificaciones/configuracion/${tipo}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
+      await api.put(`/notificaciones/configuracion/${tipo}`, updated, token);
 
       cargarConfiguraciones();
     } catch (error) {
@@ -441,6 +453,7 @@ function VistaConfiguracion() {
 // VISTA: LOG
 // ============================================
 function VistaLog() {
+  const { token } = useAuthStore();
   const [notificaciones, setNotificaciones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtros, setFiltros] = useState({
@@ -454,6 +467,8 @@ function VistaLog() {
   }, [filtros]);
 
   const cargarLog = async () => {
+    if (!token) return;
+
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -462,9 +477,10 @@ function VistaLog() {
       if (filtros.canal) params.append('canal', filtros.canal);
       params.append('limit', '50');
 
-      const response = await fetch(`/api/notificaciones/log?${params}`);
-      const data = await response.json();
-      setNotificaciones(data.notificaciones || []);
+      const response = await api.get(`/notificaciones/log?${params}`, token);
+      if (response.success) {
+        setNotificaciones(response.data.notificaciones || []);
+      }
     } catch (error) {
       console.error('Error al cargar log:', error);
     } finally {
@@ -606,6 +622,7 @@ function VistaLog() {
 // VISTA: ESTADÍSTICAS
 // ============================================
 function VistaEstadisticas() {
+  const { token } = useAuthStore();
   const [estadisticas, setEstadisticas] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -614,11 +631,14 @@ function VistaEstadisticas() {
   }, []);
 
   const cargarEstadisticas = async () => {
+    if (!token) return;
+
     setLoading(true);
     try {
-      const response = await fetch('/api/notificaciones/estadisticas');
-      const data = await response.json();
-      setEstadisticas(data);
+      const response = await api.get('/notificaciones/estadisticas', token);
+      if (response.success) {
+        setEstadisticas(response.data);
+      }
     } catch (error) {
       console.error('Error al cargar estadísticas:', error);
     } finally {

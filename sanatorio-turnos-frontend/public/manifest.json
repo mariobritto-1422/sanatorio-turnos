@@ -13,44 +13,8 @@
   "categories": ["health", "medical", "productivity"],
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any maskable"
     },
@@ -61,68 +25,26 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop-1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshots/mobile-1.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
   "shortcuts": [
     {
       "name": "Pacientes - Nuevo Turno",
       "short_name": "Nuevo Turno",
       "description": "Solicitar un nuevo turno",
-      "url": "/paciente/nuevo-turno",
-      "icons": [
-        {
-          "src": "/icons/shortcut-turno.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "/paciente/nuevo-turno"
     },
     {
-      "name": "Profesionales - Agenda",
-      "short_name": "Agenda",
-      "description": "Ver agenda del día",
-      "url": "/profesional/agenda",
-      "icons": [
-        {
-          "src": "/icons/shortcut-agenda.png",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Profesionales - Dashboard",
+      "short_name": "Dashboard Pro",
+      "description": "Panel de profesional",
+      "url": "/profesional/dashboard"
     },
     {
       "name": "Recepción - Dashboard",
       "short_name": "Dashboard",
       "description": "Panel administrativo",
-      "url": "/recepcion/dashboard",
-      "icons": [
-        {
-          "src": "/icons/shortcut-dashboard.png",
-          "sizes": "96x96"
-        }
-      ]
+      "url": "/recepcion/dashboard"
     }
   ],
-  "share_target": {
-    "action": "/compartir",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
   "related_applications": [],
   "prefer_related_applications": false
 }

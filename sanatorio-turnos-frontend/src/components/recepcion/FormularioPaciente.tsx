@@ -58,24 +58,11 @@ export function FormularioPaciente({
     setLoading(true);
 
     try {
-      const endpoint = paciente
-        ? `/pacientes/${paciente.id}`
-        : '/pacientes';
-      const method = paciente ? 'PUT' : 'POST';
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
-        {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      if (!response.ok) throw new Error('Error al guardar');
+      if (paciente) {
+        await api.updatePaciente(paciente.id, formData, token!);
+      } else {
+        await api.createPaciente(formData, token!);
+      }
 
       onSave();
       onClose();

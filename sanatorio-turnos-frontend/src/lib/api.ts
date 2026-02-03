@@ -139,6 +139,61 @@ class ApiClient {
       data: any[];
     }>(endpoint, { token });
   }
+
+  // Pacientes
+  async createPaciente(data: any, token: string) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>('/pacientes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      token,
+    });
+  }
+
+  async updatePaciente(id: string, data: any, token: string) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>(`/pacientes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      token,
+    });
+  }
+
+  // Método genérico para POST
+  async post(endpoint: string, data: any, token: string) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      token,
+    });
+  }
+
+  // Método genérico para PUT
+  async put(endpoint: string, data: any, token: string) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      token,
+    });
+  }
+
+  // Método genérico para GET sin autenticación específica (usa token si se pasa)
+  async get(endpoint: string, token?: string) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>(endpoint, token ? { token } : {});
+  }
 }
 
 export const api = new ApiClient(API_URL);

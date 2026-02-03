@@ -7,6 +7,8 @@ import { Calendar, Download, TrendingUp, Users, Activity, Clock } from 'lucide-r
 import { GraficoTorta } from '@/components/recepcion/GraficoTorta';
 import { GraficoBarras } from '@/components/recepcion/GraficoBarras';
 import { GraficoLinea } from '@/components/recepcion/GraficoLinea';
+import { api } from '@/lib/api';
+import { useAuthStore } from '@/lib/store';
 import {
   exportarTurnosExcel,
   exportarTurnosCSV,
@@ -17,6 +19,7 @@ import {
 type Periodo = 'dia' | 'semana' | 'mes';
 
 export default function EstadisticasPage() {
+  const { token } = useAuthStore();
   const [periodo, setPeriodo] = useState<Periodo>('mes');
   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
   const [turnos, setTurnos] = useState<any[]>([]);
@@ -46,14 +49,21 @@ export default function EstadisticasPage() {
   // Cargar turnos
   useEffect(() => {
     const cargarTurnos = async () => {
+      if (!token) return;
+
       setLoading(true);
       try {
         const rango = calcularRango();
-        const response = await fetch(
-          `/api/turnos?inicio=${rango.inicio.toISOString()}&fin=${rango.fin.toISOString()}`
+        const response = await api.getTurnos(
+          {
+            inicio: rango.inicio.toISOString(),
+            fin: rango.fin.toISOString(),
+          },
+          token
         );
-        const data = await response.json();
-        setTurnos(data);
+        if (response.success) {
+          setTurnos(response.data);
+        }
       } catch (error) {
         console.error('Error al cargar turnos:', error);
       } finally {
@@ -62,7 +72,7 @@ export default function EstadisticasPage() {
     };
 
     cargarTurnos();
-  }, [periodo, fechaSeleccionada]);
+  }, [periodo, fechaSeleccionada, token]);
 
   // ============================================
   // CÁLCULO DE ESTADÍSTICAS
