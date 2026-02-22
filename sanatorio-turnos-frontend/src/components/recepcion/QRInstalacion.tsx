@@ -4,7 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Download, Smartphone, QrCode } from 'lucide-react';
 
 export function QRInstalacion() {
-  const appUrl = 'https://sanatorio-turnos.netlify.app';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://sanatorio-turnos.netlify.app';
 
   const descargarQR = () => {
     const svg = document.getElementById('qr-code-svg') as unknown as SVGElement;

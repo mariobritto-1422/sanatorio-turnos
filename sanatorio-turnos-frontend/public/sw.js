@@ -1,8 +1,8 @@
-// Service Worker para PWA - Sanatorio Turnos
+// Service Worker para PWA - Sanaturno
 // Estrategia: Network First con Cache Fallback
 
-const CACHE_NAME = 'sanatorio-turnos-v1';
-const RUNTIME_CACHE = 'sanatorio-turnos-runtime-v1';
+const CACHE_NAME = 'sanaturno-v1';
+const RUNTIME_CACHE = 'sanaturno-runtime-v1';
 
 // Recursos estáticos para cachear en instalación
 const STATIC_CACHE_URLS = [
@@ -185,7 +185,7 @@ self.addEventListener('push', (event) => {
   if (!event.data) return;
 
   const data = event.data.json();
-  const title = data.title || 'Sanatorio Turnos';
+  const title = data.title || 'Sanaturno';
   const options = {
     body: data.body || 'Nueva notificación',
     icon: '/icons/icon-192x192.png',

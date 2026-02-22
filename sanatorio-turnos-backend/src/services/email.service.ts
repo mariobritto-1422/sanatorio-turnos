@@ -72,7 +72,7 @@ class EmailService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"${process.env.EMAIL_FROM_NAME || 'Sanatorio'}" <${process.env.EMAIL_FROM}>`,
+        from: `"${process.env.EMAIL_FROM_NAME || process.env.NOMBRE_INSTITUCION || 'Sanaturno'}" <${process.env.EMAIL_FROM}>`,
         to: options.to,
         subject: options.subject,
         text: options.text || this.htmlToText(options.html),

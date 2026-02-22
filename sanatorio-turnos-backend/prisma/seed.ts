@@ -84,12 +84,12 @@ async function main() {
       nombre: 'Carlos',
       apellido: 'García',
       matricula: 'MN-12345',
-      especialidad: 'Psiquiatría',
+      especialidad: 'Medicina General',
       telefono: '11-4444-5555',
       email: 'garcia@sanatorio.com',
       duracionTurnoMinutos: 45,
       colorCalendario: '#3B82F6',
-      bio: 'Psiquiatra con 15 años de experiencia en trastornos de ansiedad y depresión.',
+      bio: 'Médico con 15 años de experiencia en atención primaria.',
       obrasSociales: {
         create: [
           { obraSocialId: osde.id },
@@ -114,12 +114,12 @@ async function main() {
       nombre: 'María',
       apellido: 'López',
       matricula: 'MN-67890',
-      especialidad: 'Psicología Clínica',
+      especialidad: 'Clínica Médica',
       telefono: '11-5555-6666',
       email: 'lopez@sanatorio.com',
       duracionTurnoMinutos: 60,
       colorCalendario: '#8B5CF6',
-      bio: 'Psicóloga especializada en terapia cognitivo-conductual.',
+      bio: 'Médica especializada en clínica general y medicina interna.',
       obrasSociales: {
         create: [
           { obraSocialId: osde.id },

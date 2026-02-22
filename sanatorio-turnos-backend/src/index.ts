@@ -25,23 +25,16 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 // Seguridad
 app.use(helmet());
 
-// CORS - Configuración para múltiples orígenes
-const allowedOrigins = [
-  'http://localhost:3000', // Desarrollo local
-  'https://sanatorio-turnos.netlify.app', // Producción Netlify
-  process.env.FRONTEND_URL, // URL personalizada si existe
-].filter(Boolean); // Eliminar valores undefined/null
+// CORS - Orígenes leídos desde variable de entorno CORS_ORIGINS (separados por coma)
+// Ejemplo: CORS_ORIGINS=http://localhost:3000,https://sanatorio-turnos.netlify.app
+const corsOriginsEnv = process.env.CORS_ORIGINS || 'http://localhost:3000';
+const allowedOrigins = corsOriginsEnv.split(',').map((o) => o.trim()).filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Permitir requests sin origin (mobile apps, curl, etc)
       if (!origin) return callback(null, true);
-
-      // Permitir preview deployments de Netlify (deploy-preview-*--sanatorio-turnos.netlify.app)
-      if (origin.match(/^https:\/\/deploy-preview-\d+--sanatorio-turnos\.netlify\.app$/)) {
-        return callback(null, true);
-      }
 
       // Verificar si el origin está en la lista de permitidos
       if (allowedOrigins.includes(origin)) {
@@ -82,7 +75,7 @@ if (NODE_ENV === 'development') {
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'API de Gestión de Turnos - Sanatorio Psiquiátrico',
+    message: `API de Gestión de Turnos - ${process.env.NOMBRE_INSTITUCION || 'Sanaturno'}`,
     version: '1.0.0',
     endpoints: {
       health: '/api/health',

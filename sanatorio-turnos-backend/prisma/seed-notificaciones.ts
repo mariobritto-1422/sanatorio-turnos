@@ -178,7 +178,7 @@ async function seedNotificaciones() {
 
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #E5E7EB;">
           <p style="font-size: 12px; color: #6B7280;">
-            Sanatorio Psiquiátrico
+            ${process.env.NOMBRE_INSTITUCION || 'Sanaturno'}
           </p>
         </div>
       `,

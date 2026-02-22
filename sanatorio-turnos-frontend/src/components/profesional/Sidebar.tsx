@@ -36,6 +36,8 @@ const menuItems = [
   },
 ];
 
+const NOMBRE_INSTITUCION = process.env.NEXT_PUBLIC_NOMBRE_INSTITUCION || 'Sanaturno';
+
 export function Sidebar() {
   const pathname = usePathname();
   const { usuario, logout } = useAuthStore();
@@ -54,7 +56,7 @@ export function Sidebar() {
             <Stethoscope size={24} className="text-primary-600" />
           </div>
           <div>
-            <h2 className="font-bold text-gray-900">Sanatorio</h2>
+            <h2 className="font-bold text-gray-900">{NOMBRE_INSTITUCION}</h2>
             <p className="text-sm text-gray-500">Panel Profesional</p>
           </div>
         </div>

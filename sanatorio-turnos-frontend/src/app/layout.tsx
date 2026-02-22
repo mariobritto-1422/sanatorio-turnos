@@ -2,24 +2,26 @@ import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 import { PWARegister } from '@/components/PWARegister';
 
+const NOMBRE_INSTITUCION = process.env.NEXT_PUBLIC_NOMBRE_INSTITUCION || 'Sanaturno';
+
 export const metadata: Metadata = {
-  title: 'Sanatorio Turnos - Sistema de Gestión',
+  title: `${NOMBRE_INSTITUCION} - Sistema de Gestión`,
   description:
-    'Sistema de gestión de turnos para sanatorio psiquiátrico con accesibilidad WCAG AAA',
-  applicationName: 'Sanatorio Turnos',
+    `Sistema de gestión de turnos médicos para ${NOMBRE_INSTITUCION} con accesibilidad WCAG AAA`,
+  applicationName: NOMBRE_INSTITUCION,
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Sanatorio Turnos',
+    title: NOMBRE_INSTITUCION,
   },
   formatDetection: {
     telephone: false,
   },
   manifest: '/manifest.json',
-  keywords: ['turnos', 'sanatorio', 'salud', 'psiquiatría', 'gestión'],
-  authors: [{ name: 'Sanatorio Turnos' }],
-  creator: 'Sanatorio Turnos',
-  publisher: 'Sanatorio Turnos',
+  keywords: ['turnos', 'salud', 'gestión', 'médico', 'clínica'],
+  authors: [{ name: NOMBRE_INSTITUCION }],
+  creator: NOMBRE_INSTITUCION,
+  publisher: NOMBRE_INSTITUCION,
   robots: 'index, follow',
   icons: {
     icon: [
@@ -54,7 +56,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Sanatorio Turnos" />
+        <meta name="apple-mobile-web-app-title" content={NOMBRE_INSTITUCION} />
         <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
