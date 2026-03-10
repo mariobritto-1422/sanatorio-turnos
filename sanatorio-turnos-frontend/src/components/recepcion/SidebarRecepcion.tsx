@@ -13,6 +13,7 @@ import {
   ClipboardList,
   BarChart3,
   Bell,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -120,6 +121,19 @@ export function SidebarRecepcion() {
           })}
         </ul>
       </nav>
+
+      {/* Link a Guardia Admin (solo SUPERADMIN) */}
+      {usuario?.rol === 'SUPERADMIN' && (
+        <div className="px-4 pb-2">
+          <Link
+            href="/guardia-admin"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-indigo-600 hover:bg-indigo-50 transition-colors border border-indigo-200"
+          >
+            <ShieldCheck size={18} />
+            <span>Panel de Guardias</span>
+          </Link>
+        </div>
+      )}
 
       {/* Logout */}
       <div className="p-4 border-t border-gray-200">
