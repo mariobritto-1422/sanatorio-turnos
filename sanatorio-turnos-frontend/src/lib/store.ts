@@ -5,6 +5,7 @@ interface Usuario {
   id: string;
   email: string;
   rol: string;
+  sanatorioId?: string;
   paciente?: {
     id: string;
     nombre: string;
@@ -17,6 +18,13 @@ interface Usuario {
     especialidadId: string;
     matricula: string;
     especialidad?: string;
+  };
+  personalGuardia?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    rol: string;
+    sanatorioId: string;
   };
 }
 

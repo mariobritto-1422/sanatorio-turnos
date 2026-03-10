@@ -51,3 +51,9 @@ export const requireProfesional = requireRole(Rol.PROFESIONAL, Rol.SUPERADMIN);
  * Middleware para verificar que sea paciente
  */
 export const requirePaciente = requireRole(Rol.PACIENTE, Rol.SUPERADMIN);
+
+/**
+ * Módulo Guardias — helpers por rol
+ */
+export const requireSupervisorGuardia = requireRole(Rol.SUPERVISOR_GUARDIA, Rol.SUPERADMIN);
+export const requirePersonalGuardia   = requireRole(Rol.ENFERMERO, Rol.MUCAMA, Rol.SUPERVISOR_GUARDIA, Rol.SUPERADMIN);

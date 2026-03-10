@@ -1,5 +1,6 @@
 // ============================================
 // SCHEMA PRISMA - Sistema de Gestión de Turnos
+// Fase 1: turnos + Fase 2: guardias
 // SIN historial clínico (evitar conflictos legales)
 // ============================================
 
@@ -13,7 +14,7 @@ datasource db {
 }
 
 // ============================================
-// ENUMS
+// ENUMS — FASE 1
 // ============================================
 
 enum Rol {
@@ -21,6 +22,9 @@ enum Rol {
   PROFESIONAL
   RECEPCION
   SUPERADMIN
+  ENFERMERO
+  MUCAMA
+  SUPERVISOR_GUARDIA
 }
 
 enum EstadoUsuario {
@@ -95,6 +99,65 @@ enum EstadoNotificacion {
 }
 
 // ============================================
+// ENUMS — FASE 2: MÓDULO GUARDIAS
+// ============================================
+
+enum TipoContrato {
+  PLANTA_PERMANENTE
+  CONTRATADO
+}
+
+enum RolGuardia {
+  ENFERMERO
+  MUCAMA
+}
+
+enum TipoGuardia {
+  NORMAL
+  EXTRA
+  FRANCO
+  VACACIONES
+  FERIADO
+  LICENCIA
+}
+
+enum GeneradaPor {
+  ALGORITMO
+  MANUAL
+  CANJE
+}
+
+enum EstadoCanje {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+enum TipoFeriado {
+  NACIONAL
+  LOCAL
+}
+
+// ============================================
+// SANATORIO (multi-tenant mínimo + feature flag)
+// ============================================
+
+model Sanatorio {
+  id                    String    @id @default(uuid())
+  nombre                String
+  moduloGuardiasActivo  Boolean   @default(false) @map("modulo_guardias_activo")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  usuarios              Usuario[]
+  personalGuardia       PersonalGuardia[]
+  configuracionTurnos   ConfiguracionTurnos?
+  feriados              Feriado[]
+
+  @@map("sanatorios")
+}
+
+// ============================================
 // USUARIOS Y AUTENTICACIÓN
 // ============================================
 
@@ -107,16 +170,20 @@ model Usuario {
   ultimoAcceso      DateTime?      @map("ultimo_acceso")
   tokenRecuperacion String?        @map("token_recuperacion")
   tokenExpiracion   DateTime?      @map("token_expiracion")
+  sanatorioId       String?        @map("sanatorio_id")
   createdAt         DateTime       @default(now()) @map("created_at")
   updatedAt         DateTime       @updatedAt @map("updated_at")
 
-  // Relaciones
   paciente          Paciente?
   profesional       Profesional?
+  personalGuardia   PersonalGuardia?
+  sanatorio         Sanatorio?     @relation(fields: [sanatorioId], references: [id], onDelete: SetNull)
   turnosCreados     Turno[]        @relation("TurnosCreadosPor")
   turnosCancelados  Turno[]        @relation("TurnosCanceladosPor")
   auditLogs         AuditLog[]
+  canjesAprobados   SolicitudCanje[] @relation("CanjesAprobadosPor")
 
+  @@index([sanatorioId])
   @@map("usuarios")
 }
 
@@ -125,32 +192,31 @@ model Usuario {
 // ============================================
 
 model Paciente {
-  id                         String          @id @default(uuid())
-  usuarioId                  String?         @unique @map("usuario_id")
-  dni                        String          @unique
-  nombre                     String
-  apellido                   String
-  fechaNacimiento            DateTime        @map("fecha_nacimiento") @db.Date
-  genero                     Genero
-  telefono                   String
-  email                      String?
-  direccion                  String?
-  localidad                  String?
-  provincia                  String?
-  obraSocialId               String?         @map("obra_social_id")
-  numeroAfiliado             String?         @map("numero_afiliado")
-  observacionesMedicas       String?         @map("observaciones_medicas") @db.Text // Solo alergias, etc.
-  estado                     EstadoPaciente  @default(ACTIVO)
-  familiarResponsableNombre  String?         @map("familiar_responsable_nombre")
+  id                          String         @id @default(uuid())
+  usuarioId                   String?        @unique @map("usuario_id")
+  dni                         String         @unique
+  nombre                      String
+  apellido                    String
+  fechaNacimiento             DateTime       @map("fecha_nacimiento") @db.Date
+  genero                      Genero
+  telefono                    String
+  email                       String?
+  direccion                   String?
+  localidad                   String?
+  provincia                   String?
+  obraSocialId                String?        @map("obra_social_id")
+  numeroAfiliado              String?        @map("numero_afiliado")
+  observacionesMedicas        String?        @map("observaciones_medicas") @db.Text
+  estado                      EstadoPaciente @default(ACTIVO)
+  familiarResponsableNombre   String?        @map("familiar_responsable_nombre")
   familiarResponsableTelefono String?        @map("familiar_responsable_telefono")
   familiarResponsableRelacion String?        @map("familiar_responsable_relacion")
-  createdAt                  DateTime        @default(now()) @map("created_at")
-  updatedAt                  DateTime        @updatedAt @map("updated_at")
+  createdAt                   DateTime       @default(now()) @map("created_at")
+  updatedAt                   DateTime       @updatedAt @map("updated_at")
 
-  // Relaciones
-  usuario                    Usuario?        @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
-  obraSocial                 ObraSocial?     @relation(fields: [obraSocialId], references: [id], onDelete: SetNull)
-  turnos                     Turno[]
+  usuario    Usuario?   @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  obraSocial ObraSocial? @relation(fields: [obraSocialId], references: [id], onDelete: SetNull)
+  turnos     Turno[]
 
   @@index([dni])
   @@index([apellido, nombre])
@@ -162,50 +228,44 @@ model Paciente {
 // ============================================
 
 model Profesional {
-  id                      String                         @id @default(uuid())
-  usuarioId               String                         @unique @map("usuario_id")
-  nombre                  String
-  apellido                String
-  matricula               String                         @unique
-  especialidad            String
-  telefono                String?
-  email                   String
-  duracionTurnoMinutos    Int                            @default(30) @map("duracion_turno_minutos")
-  colorCalendario         String?                        @map("color_calendario") // HEX color
-  aceptaNuevosPacientes   Boolean                        @default(true) @map("acepta_nuevos_pacientes")
-  bio                     String?                        @db.Text
-  estado                  EstadoProfesional              @default(ACTIVO)
-  createdAt               DateTime                       @default(now()) @map("created_at")
-  updatedAt               DateTime                       @updatedAt @map("updated_at")
+  id                    String             @id @default(uuid())
+  usuarioId             String             @unique @map("usuario_id")
+  nombre                String
+  apellido              String
+  matricula             String             @unique
+  especialidad          String
+  telefono              String?
+  email                 String
+  duracionTurnoMinutos  Int                @default(30) @map("duracion_turno_minutos")
+  colorCalendario       String?            @map("color_calendario")
+  aceptaNuevosPacientes Boolean            @default(true) @map("acepta_nuevos_pacientes")
+  bio                   String?            @db.Text
+  estado                EstadoProfesional  @default(ACTIVO)
+  createdAt             DateTime           @default(now()) @map("created_at")
+  updatedAt             DateTime           @updatedAt @map("updated_at")
 
-  // Relaciones
-  usuario                 Usuario                        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  horarios                HorarioProfesional[]
-  bloqueos                BloqueoHorario[]
-  turnos                  Turno[]
-  obrasSociales           ProfesionalObraSocial[]
+  usuario       Usuario                @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  horarios      HorarioProfesional[]
+  bloqueos      BloqueoHorario[]
+  turnos        Turno[]
+  obrasSociales ProfesionalObraSocial[]
 
   @@index([matricula])
   @@index([apellido, nombre])
   @@map("profesionales")
 }
 
-// ============================================
-// CONFIGURACIÓN DE HORARIOS
-// ============================================
-
 model HorarioProfesional {
-  id             String       @id @default(uuid())
-  profesionalId  String       @map("profesional_id")
-  diaSemana      Int          @map("dia_semana") // 0=Domingo, 1=Lunes, ... 6=Sábado
-  horaInicio     String       @map("hora_inicio") // Format: "09:00"
-  horaFin        String       @map("hora_fin")    // Format: "17:00"
-  estado         EstadoGenerico @default(ACTIVO)
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id            String         @id @default(uuid())
+  profesionalId String         @map("profesional_id")
+  diaSemana     Int            @map("dia_semana")
+  horaInicio    String         @map("hora_inicio")
+  horaFin       String         @map("hora_fin")
+  estado        EstadoGenerico @default(ACTIVO)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
 
-  // Relaciones
-  profesional    Profesional  @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
+  profesional Profesional @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
 
   @@unique([profesionalId, diaSemana, horaInicio])
   @@index([profesionalId])
@@ -213,17 +273,16 @@ model HorarioProfesional {
 }
 
 model BloqueoHorario {
-  id             String       @id @default(uuid())
-  profesionalId  String       @map("profesional_id")
-  fechaInicio    DateTime     @map("fecha_inicio")
-  fechaFin       DateTime     @map("fecha_fin")
-  motivo         String?      @db.Text
-  tipo           TipoBloqueo
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  id            String      @id @default(uuid())
+  profesionalId String      @map("profesional_id")
+  fechaInicio   DateTime    @map("fecha_inicio")
+  fechaFin      DateTime    @map("fecha_fin")
+  motivo        String?     @db.Text
+  tipo          TipoBloqueo
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
 
-  // Relaciones
-  profesional    Profesional  @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
+  profesional Profesional @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
 
   @@index([profesionalId, fechaInicio, fechaFin])
   @@map("bloqueos_horario")
@@ -234,33 +293,31 @@ model BloqueoHorario {
 // ============================================
 
 model ObraSocial {
-  id         String                    @id @default(uuid())
-  nombre     String                    @unique
-  codigo     String?                   @unique
-  plan       String?
-  telefono   String?
-  email      String?
-  estado     EstadoGenerico            @default(ACTIVO)
-  createdAt  DateTime                  @default(now()) @map("created_at")
-  updatedAt  DateTime                  @updatedAt @map("updated_at")
+  id        String         @id @default(uuid())
+  nombre    String         @unique
+  codigo    String?        @unique
+  plan      String?
+  telefono  String?
+  email     String?
+  estado    EstadoGenerico @default(ACTIVO)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
 
-  // Relaciones
-  pacientes       Paciente[]
-  profesionales   ProfesionalObraSocial[]
-  turnos          Turno[]
+  pacientes     Paciente[]
+  profesionales ProfesionalObraSocial[]
+  turnos        Turno[]
 
   @@map("obras_sociales")
 }
 
 model ProfesionalObraSocial {
-  id             String       @id @default(uuid())
-  profesionalId  String       @map("profesional_id")
-  obraSocialId   String       @map("obra_social_id")
-  createdAt      DateTime     @default(now()) @map("created_at")
+  id            String   @id @default(uuid())
+  profesionalId String   @map("profesional_id")
+  obraSocialId  String   @map("obra_social_id")
+  createdAt     DateTime @default(now()) @map("created_at")
 
-  // Relaciones
-  profesional    Profesional  @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
-  obraSocial     ObraSocial   @relation(fields: [obraSocialId], references: [id], onDelete: Cascade)
+  profesional Profesional @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
+  obraSocial  ObraSocial  @relation(fields: [obraSocialId], references: [id], onDelete: Cascade)
 
   @@unique([profesionalId, obraSocialId])
   @@index([profesionalId])
@@ -269,34 +326,33 @@ model ProfesionalObraSocial {
 }
 
 // ============================================
-// TURNOS (NÚCLEO DEL SISTEMA)
+// TURNOS (NÚCLEO FASE 1)
 // ============================================
 
 model Turno {
-  id                  String        @id @default(uuid())
-  pacienteId          String        @map("paciente_id")
-  profesionalId       String        @map("profesional_id")
-  fechaHora           DateTime      @map("fecha_hora")
-  duracionMinutos     Int           @default(30) @map("duracion_minutos")
-  estado              EstadoTurno   @default(PENDIENTE)
-  tipo                TipoTurno     @default(CONTROL)
-  motivoConsulta      String?       @map("motivo_consulta") @db.Text
-  notaSimple          String?       @map("nota_simple") @db.Text // Nota básica opcional (ayuda memoria)
-  obraSocialId        String?       @map("obra_social_id")
-  motivoCancelacion   String?       @map("motivo_cancelacion") @db.Text
-  canceladoPor        String?       @map("cancelado_por")
-  canceladoEn         DateTime?     @map("cancelado_en")
-  creadoPor           String        @map("creado_por")
-  recordatorioEnviado Boolean       @default(false) @map("recordatorio_enviado")
-  createdAt           DateTime      @default(now()) @map("created_at")
-  updatedAt           DateTime      @updatedAt @map("updated_at")
+  id                  String      @id @default(uuid())
+  pacienteId          String      @map("paciente_id")
+  profesionalId       String      @map("profesional_id")
+  fechaHora           DateTime    @map("fecha_hora")
+  duracionMinutos     Int         @default(30) @map("duracion_minutos")
+  estado              EstadoTurno @default(PENDIENTE)
+  tipo                TipoTurno   @default(CONTROL)
+  motivoConsulta      String?     @map("motivo_consulta") @db.Text
+  notaSimple          String?     @map("nota_simple") @db.Text
+  obraSocialId        String?     @map("obra_social_id")
+  motivoCancelacion   String?     @map("motivo_cancelacion") @db.Text
+  canceladoPor        String?     @map("cancelado_por")
+  canceladoEn         DateTime?   @map("cancelado_en")
+  creadoPor           String      @map("creado_por")
+  recordatorioEnviado Boolean     @default(false) @map("recordatorio_enviado")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
 
-  // Relaciones
-  paciente            Paciente      @relation(fields: [pacienteId], references: [id], onDelete: Restrict)
-  profesional         Profesional   @relation(fields: [profesionalId], references: [id], onDelete: Restrict)
-  obraSocial          ObraSocial?   @relation(fields: [obraSocialId], references: [id], onDelete: SetNull)
-  usuarioCreadoPor    Usuario       @relation("TurnosCreadosPor", fields: [creadoPor], references: [id])
-  usuarioCanceladoPor Usuario?      @relation("TurnosCanceladosPor", fields: [canceladoPor], references: [id])
+  paciente            Paciente  @relation(fields: [pacienteId], references: [id], onDelete: Restrict)
+  profesional         Profesional @relation(fields: [profesionalId], references: [id], onDelete: Restrict)
+  obraSocial          ObraSocial? @relation(fields: [obraSocialId], references: [id], onDelete: SetNull)
+  usuarioCreadoPor    Usuario   @relation("TurnosCreadosPor", fields: [creadoPor], references: [id])
+  usuarioCanceladoPor Usuario?  @relation("TurnosCanceladosPor", fields: [canceladoPor], references: [id])
 
   @@index([profesionalId, fechaHora, estado])
   @@index([pacienteId, fechaHora])
@@ -309,19 +365,18 @@ model Turno {
 // ============================================
 
 model AuditLog {
-  id              String    @id @default(uuid())
-  usuarioId       String?   @map("usuario_id")
-  accion          String    // CREATE_TURNO, DELETE_PACIENTE, etc.
-  entidadTipo     String?   @map("entidad_tipo") // turnos, pacientes, etc.
-  entidadId       String?   @map("entidad_id")
-  datosAnteriores Json?     @map("datos_anteriores")
-  datosNuevos     Json?     @map("datos_nuevos")
-  ipAddress       String?   @map("ip_address")
-  userAgent       String?   @map("user_agent") @db.Text
-  createdAt       DateTime  @default(now()) @map("created_at")
+  id              String   @id @default(uuid())
+  usuarioId       String?  @map("usuario_id")
+  accion          String
+  entidadTipo     String?  @map("entidad_tipo")
+  entidadId       String?  @map("entidad_id")
+  datosAnteriores Json?    @map("datos_anteriores")
+  datosNuevos     Json?    @map("datos_nuevos")
+  ipAddress       String?  @map("ip_address")
+  userAgent       String?  @map("user_agent") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
 
-  // Relaciones
-  usuario         Usuario?  @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
 
   @@index([usuarioId, createdAt])
   @@index([entidadTipo, entidadId])
@@ -329,59 +384,190 @@ model AuditLog {
 }
 
 // ============================================
-// SISTEMA DE NOTIFICACIONES
+// NOTIFICACIONES
 // ============================================
 
 model PlantillaNotificacion {
-  id          String              @id @default(uuid())
-  tipo        TipoNotificacion    @unique
-  canal       CanalNotificacion
-  asunto      String?             // Para emails
-  cuerpo      String              @db.Text
-  variables   String[]            @default([]) // Variables disponibles: {paciente}, {profesional}, {fecha}, etc.
-  activo      Boolean             @default(true)
-  createdAt   DateTime            @default(now()) @map("created_at")
-  updatedAt   DateTime            @updatedAt @map("updated_at")
+  id        String           @id @default(uuid())
+  tipo      TipoNotificacion @unique
+  canal     CanalNotificacion
+  asunto    String?
+  cuerpo    String           @db.Text
+  variables String[]         @default([])
+  activo    Boolean          @default(true)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
 
   @@map("plantillas_notificacion")
 }
 
 model ConfiguracionNotificaciones {
-  id                      String   @id @default(uuid())
-  tipoNotificacion        TipoNotificacion @map("tipo_notificacion")
-  emailActivo             Boolean  @default(true) @map("email_activo")
-  whatsappActivo          Boolean  @default(false) @map("whatsapp_activo")
-  smsActivo               Boolean  @default(false) @map("sms_activo")
-  horaInicioEnvio         String   @default("08:00") @map("hora_inicio_envio") // HH:mm
-  horaFinEnvio            String   @default("20:00") @map("hora_fin_envio")     // HH:mm
-  createdAt               DateTime @default(now()) @map("created_at")
-  updatedAt               DateTime @updatedAt @map("updated_at")
+  id               String           @id @default(uuid())
+  tipoNotificacion TipoNotificacion @map("tipo_notificacion")
+  emailActivo      Boolean          @default(true) @map("email_activo")
+  whatsappActivo   Boolean          @default(false) @map("whatsapp_activo")
+  smsActivo        Boolean          @default(false) @map("sms_activo")
+  horaInicioEnvio  String           @default("08:00") @map("hora_inicio_envio")
+  horaFinEnvio     String           @default("20:00") @map("hora_fin_envio")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
 
   @@unique([tipoNotificacion])
   @@map("configuracion_notificaciones")
 }
 
 model Notificacion {
-  id                String                @id @default(uuid())
-  turnoId           String                @map("turno_id")
-  pacienteId        String                @map("paciente_id")
-  tipo              TipoNotificacion
-  canal             CanalNotificacion
-  destinatario      String                // Email o número de teléfono
-  asunto            String?               // Para emails
-  mensaje           String                @db.Text
-  estado            EstadoNotificacion    @default(PENDIENTE)
-  intentos          Int                   @default(0)
-  fechaProgramada   DateTime?             @map("fecha_programada")
-  fechaEnvio        DateTime?             @map("fecha_envio")
-  errorMensaje      String?               @map("error_mensaje") @db.Text
-  metadataEnvio     Json?                 @map("metadata_envio") // Respuesta del proveedor (Twilio, etc.)
-  createdAt         DateTime              @default(now()) @map("created_at")
-  updatedAt         DateTime              @updatedAt @map("updated_at")
+  id              String             @id @default(uuid())
+  turnoId         String             @map("turno_id")
+  pacienteId      String             @map("paciente_id")
+  tipo            TipoNotificacion
+  canal           CanalNotificacion
+  destinatario    String
+  asunto          String?
+  mensaje         String             @db.Text
+  estado          EstadoNotificacion @default(PENDIENTE)
+  intentos        Int                @default(0)
+  fechaProgramada DateTime?          @map("fecha_programada")
+  fechaEnvio      DateTime?          @map("fecha_envio")
+  errorMensaje    String?            @map("error_mensaje") @db.Text
+  metadataEnvio   Json?              @map("metadata_envio")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
 
   @@index([turnoId])
   @@index([pacienteId])
   @@index([estado, fechaProgramada])
   @@index([fechaEnvio])
   @@map("notificaciones")
+}
+
+// ============================================================
+// MÓDULO GUARDIAS — Fase 2
+// ============================================================
+
+model PersonalGuardia {
+  id                     String       @id @default(uuid())
+  usuarioId              String       @unique @map("usuario_id")
+  sanatorioId            String       @map("sanatorio_id")
+  nombre                 String
+  apellido               String
+  email                  String
+  rol                    RolGuardia
+  tipoContrato           TipoContrato @map("tipo_contrato")
+  fechaIngreso           DateTime     @map("fecha_ingreso") @db.Date
+  horasSemanalesContrato Int          @map("horas_semanales_contrato")
+  activo                 Boolean      @default(true)
+  createdAt              DateTime     @default(now()) @map("created_at")
+  updatedAt              DateTime     @updatedAt @map("updated_at")
+
+  usuario          Usuario         @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  sanatorio        Sanatorio       @relation(fields: [sanatorioId], references: [id], onDelete: Cascade)
+  guardias         Guardia[]
+  bancoHoras       BancoHoras[]
+  canjesSolicitados SolicitudCanje[] @relation("CanjesSolicitados")
+  canjesRecibidos   SolicitudCanje[] @relation("CanjesRecibidos")
+
+  @@index([sanatorioId, rol])
+  @@index([sanatorioId, activo])
+  @@map("personal_guardia")
+}
+
+model ConfiguracionTurnos {
+  id                          String    @id @default(uuid())
+  sanatorioId                 String    @unique @map("sanatorio_id")
+  turnos                      Json
+  maxDiasSeguidosSinFranco    Int       @default(6) @map("max_dias_seguidos_sin_franco")
+  maxNochesSeguidasPermitidas Int       @default(3) @map("max_noches_seguidas_permitidas")
+  diasFrancoSemanal           Int       @default(2) @map("dias_franco_semanal")
+  createdAt                   DateTime  @default(now()) @map("created_at")
+  updatedAt                   DateTime  @updatedAt @map("updated_at")
+
+  sanatorio Sanatorio @relation(fields: [sanatorioId], references: [id], onDelete: Cascade)
+
+  @@map("configuracion_turnos")
+}
+
+model Guardia {
+  id               String      @id @default(uuid())
+  personalId       String      @map("personal_id")
+  fecha            DateTime    @db.Date
+  turnoNombre      String      @map("turno_nombre")
+  tipo             TipoGuardia @default(NORMAL)
+  horas            Float
+  generadaPor      GeneradaPor @default(ALGORITMO) @map("generada_por")
+  aprobada         Boolean     @default(false)
+  requiereRevision Boolean     @default(false) @map("requiere_revision")
+  notas            String?     @db.Text
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  personal      PersonalGuardia  @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  canjeOfrecido SolicitudCanje[] @relation("GuardiaOfrecida")
+  canjeDeseado  SolicitudCanje[] @relation("GuardiaDeseada")
+
+  @@unique([personalId, fecha, turnoNombre])
+  @@index([personalId, fecha])
+  @@index([fecha])
+  @@map("guardias")
+}
+
+model BancoHoras {
+  id                 String   @id @default(uuid())
+  personalId         String   @map("personal_id")
+  mes                Int
+  anio               Int      @map("anio")
+  horasContrato      Float    @map("horas_contrato")
+  horasTrabajadas    Float    @default(0) @map("horas_trabajadas")
+  horasExtra         Float    @default(0) @map("horas_extra")
+  horasDeuda         Float    @default(0) @map("horas_deuda")
+  francosPendientes  Float    @default(0) @map("francos_pendientes")
+  findesTrabajados   Int      @default(0) @map("findes_trabajados")
+  feriadosTrabajados Int      @default(0) @map("feriados_trabajados")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  personal PersonalGuardia @relation(fields: [personalId], references: [id], onDelete: Cascade)
+
+  @@unique([personalId, mes, anio])
+  @@index([personalId])
+  @@map("banco_horas")
+}
+
+model SolicitudCanje {
+  id                String      @id @default(uuid())
+  solicitanteId     String      @map("solicitante_id")
+  receptorId        String      @map("receptor_id")
+  guardiaOfrecidaId String      @map("guardia_ofrecida_id")
+  guardiaDeseadaId  String      @map("guardia_deseada_id")
+  estado            EstadoCanje @default(PENDIENTE)
+  aprobadoPorId     String?     @map("aprobado_por_id")
+  motivo            String?     @db.Text
+  motivoRechazo     String?     @map("motivo_rechazo") @db.Text
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  solicitante     PersonalGuardia @relation("CanjesSolicitados", fields: [solicitanteId], references: [id], onDelete: Cascade)
+  receptor        PersonalGuardia @relation("CanjesRecibidos", fields: [receptorId], references: [id], onDelete: Cascade)
+  guardiaOfrecida Guardia         @relation("GuardiaOfrecida", fields: [guardiaOfrecidaId], references: [id], onDelete: Cascade)
+  guardiaDeseada  Guardia         @relation("GuardiaDeseada", fields: [guardiaDeseadaId], references: [id], onDelete: Cascade)
+  aprobadoPor     Usuario?        @relation("CanjesAprobadosPor", fields: [aprobadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([solicitanteId, estado])
+  @@index([receptorId, estado])
+  @@map("solicitudes_canje")
+}
+
+model Feriado {
+  id          String      @id @default(uuid())
+  fecha       DateTime    @db.Date
+  nombre      String
+  tipo        TipoFeriado
+  sanatorioId String?     @map("sanatorio_id")
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  sanatorio Sanatorio? @relation(fields: [sanatorioId], references: [id], onDelete: Cascade)
+
+  @@unique([fecha, sanatorioId])
+  @@index([fecha])
+  @@map("feriados")
 }

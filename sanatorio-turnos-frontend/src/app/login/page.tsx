@@ -34,8 +34,15 @@ export default function LoginPage() {
             router.push('/profesional/dashboard');
             break;
           case 'RECEPCION':
-          case 'SUPERADMIN':
             router.push('/recepcion/dashboard');
+            break;
+          case 'ENFERMERO':
+          case 'MUCAMA':
+            router.push('/guardia-personal');
+            break;
+          case 'SUPERVISOR_GUARDIA':
+          case 'SUPERADMIN':
+            router.push('/guardia-admin');
             break;
           default:
             router.push('/');
@@ -151,13 +158,17 @@ export default function LoginPage() {
         {/* Credenciales de prueba */}
         <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <p className="text-sm font-semibold text-gray-700 mb-2">
-            💡 Credenciales de prueba:
+            Credenciales de prueba:
           </p>
           <div className="space-y-1 text-xs text-gray-600">
+            <p className="font-medium text-gray-500 mt-1">— Módulo Guardias —</p>
+            <p><strong>Supervisor:</strong> admin@sanatorio.com / Admin123!</p>
+            <p><strong>Enfermera:</strong> mgonzalez@sanaturno.com / Guardia123!</p>
+            <p><strong>Mucama:</strong> sgomez@sanaturno.com / Guardia123!</p>
+            <p className="font-medium text-gray-500 mt-2">— Módulo Turnos —</p>
             <p><strong>Paciente:</strong> juan.perez@email.com / Paciente123!</p>
             <p><strong>Recepción:</strong> recepcion@sanatorio.com / Recepcion123!</p>
             <p><strong>Profesional:</strong> garcia@sanatorio.com / Garcia123!</p>
-            <p><strong>Admin:</strong> admin@sanatorio.com / Admin123!</p>
           </div>
         </div>
       </div>

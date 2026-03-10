@@ -10,6 +10,7 @@ export const authService = {
       include: {
         paciente: { select: { id: true, nombre: true, apellido: true } },
         profesional: { select: { id: true, nombre: true, apellido: true } },
+        personalGuardia: { select: { id: true, nombre: true, apellido: true, rol: true, sanatorioId: true } },
       },
     });
 
@@ -44,8 +45,10 @@ export const authService = {
         id: usuario.id,
         email: usuario.email,
         rol: usuario.rol,
+        sanatorioId: usuario.sanatorioId,
         paciente: usuario.paciente,
         profesional: usuario.profesional,
+        personalGuardia: usuario.personalGuardia,
       },
     };
   },

@@ -5,6 +5,13 @@ import profesionalRoutes from './profesional.routes';
 import turnoRoutes from './turno.routes';
 import obraSocialRoutes from './obraSocial.routes';
 import notificacionesRoutes from './notificaciones.routes';
+// Módulo Guardias — Fase 2
+import guardiasRoutes from './guardias.routes';
+import bancoHorasRoutes from './banco-horas.routes';
+import canjesRoutes from './canjes.routes';
+import feriadosRoutes from './feriados.routes';
+import configuracionTurnosRoutes from './configuracion-turnos.routes';
+import personalGuardiaRoutes from './personal-guardia.routes';
 
 const router = Router();
 
@@ -17,12 +24,20 @@ router.get('/health', (req, res) => {
   });
 });
 
-// Rutas principales
+// Rutas principales — Fase 1
 router.use('/auth', authRoutes);
 router.use('/pacientes', pacienteRoutes);
 router.use('/profesionales', profesionalRoutes);
 router.use('/turnos', turnoRoutes);
 router.use('/obras-sociales', obraSocialRoutes);
 router.use('/notificaciones', notificacionesRoutes);
+
+// Rutas Módulo Guardias — Fase 2
+router.use('/guardias', guardiasRoutes);
+router.use('/banco-horas', bancoHorasRoutes);
+router.use('/canjes', canjesRoutes);
+router.use('/feriados', feriadosRoutes);
+router.use('/configuracion-turnos', configuracionTurnosRoutes);
+router.use('/personal-guardia', personalGuardiaRoutes);
 
 export default router;
