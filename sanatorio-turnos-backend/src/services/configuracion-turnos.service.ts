@@ -24,7 +24,7 @@ export const configuracionTurnosService = {
         diasFrancoSemanal: 2,
       };
     }
-    return { ...config, turnos: config.turnos as DefinicionTurno[] };
+    return { ...config, turnos: config.turnos as unknown as DefinicionTurno[] };
   },
 
   async upsert(sanatorioId: string, data: {
@@ -33,10 +33,11 @@ export const configuracionTurnosService = {
     maxNochesSeguidasPermitidas?: number;
     diasFrancoSemanal?: number;
   }) {
+    const prismaData = { ...data, turnos: data.turnos as any };
     return prisma.configuracionTurnos.upsert({
       where: { sanatorioId },
-      create: { sanatorioId, ...data },
-      update: data,
+      create: { sanatorioId, ...prismaData },
+      update: prismaData,
     });
   },
 };
