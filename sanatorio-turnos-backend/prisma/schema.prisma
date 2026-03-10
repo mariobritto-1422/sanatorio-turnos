@@ -152,6 +152,7 @@ model Sanatorio {
   usuarios              Usuario[]
   personalGuardia       PersonalGuardia[]
   configuracionTurnos   ConfiguracionTurnos?
+  configuracionSanatorio ConfiguracionSanatorio?
   feriados              Feriado[]
 
   @@map("sanatorios")
@@ -570,4 +571,25 @@ model Feriado {
   @@unique([fecha, sanatorioId])
   @@index([fecha])
   @@map("feriados")
+}
+
+// ============================================
+// CONFIGURACIÓN GENERAL DEL SANATORIO
+// ============================================
+
+model ConfiguracionSanatorio {
+  id                      String   @id @default(uuid())
+  sanatorioId             String   @unique @map("sanatorio_id")
+  horarioApertura         String   @default("08:00") @map("horario_apertura")
+  horarioCierre           String   @default("20:00") @map("horario_cierre")
+  diasAtencion            String   @default("1,2,3,4,5") @map("dias_atencion")
+  duracionTurnoDefaultMin Int      @default(30) @map("duracion_turno_default_min")
+  telefonoContacto        String?  @map("telefono_contacto")
+  emailContacto           String?  @map("email_contacto")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  sanatorio Sanatorio @relation(fields: [sanatorioId], references: [id], onDelete: Cascade)
+
+  @@map("configuracion_sanatorio")
 }

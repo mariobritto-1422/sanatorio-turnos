@@ -12,6 +12,7 @@ import canjesRoutes from './canjes.routes';
 import feriadosRoutes from './feriados.routes';
 import configuracionTurnosRoutes from './configuracion-turnos.routes';
 import personalGuardiaRoutes from './personal-guardia.routes';
+import configuracionSanatorioRoutes from './configuracion-sanatorio.routes';
 
 const router = Router();
 
@@ -39,5 +40,6 @@ router.use('/canjes', canjesRoutes);
 router.use('/feriados', feriadosRoutes);
 router.use('/configuracion-turnos', configuracionTurnosRoutes);
 router.use('/personal-guardia', personalGuardiaRoutes);
+router.use('/configuracion-sanatorio', configuracionSanatorioRoutes);
 
 export default router;

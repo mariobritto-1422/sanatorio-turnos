@@ -194,6 +194,17 @@ class ApiClient {
       data: any;
     }>(endpoint, token ? { token } : {});
   }
+
+  // Método genérico para DELETE
+  async delete(endpoint: string, token: string) {
+    return this.request<{
+      success: boolean;
+      message?: string;
+    }>(endpoint, {
+      method: 'DELETE',
+      token,
+    });
+  }
 }
 
 export const api = new ApiClient(API_URL);
